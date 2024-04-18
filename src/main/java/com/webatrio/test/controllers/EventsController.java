@@ -65,15 +65,11 @@ public class EventsController {
 
     @ApiOperation(value = "Get Events with Pagination")
     @PostMapping()
-    public RestPage<Events> getEventsWithPagination(@RequestBody Map<String, Integer> paginationParams) {
+    public Page<Events> getEventsWithPagination(@RequestBody Map<String, Integer> paginationParams ) {
         int page = paginationParams.getOrDefault("page", 0);
         int size = paginationParams.getOrDefault("size", 10);
-        Pageable pageable = PageRequest.of(page, size);
-        List<Events> events = eventsService.findEvents();
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), events.size());
-        Page<Events> eventsPage = new PageImpl<>(events.subList(start, end), pageable, events.size());
-        return new RestPage<>(eventsPage);
+        Page<Events> events = eventsService.findEvents(page,size);
+            return events;
     }
 
     @ApiOperation(value = "Get Events with Pagination")

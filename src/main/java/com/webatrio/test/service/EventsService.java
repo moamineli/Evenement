@@ -3,8 +3,6 @@ package com.webatrio.test.service;
 import com.webatrio.test.models.Events;
 import com.webatrio.test.models.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
@@ -21,7 +19,8 @@ public interface EventsService {
     Events deleteUserFromEvent(Long userId, Long eventId);
 
 
-    List<Events> findEvents( );
+
+    Page<Events> findEvents(Integer page, Integer size);
 
     List<Events> findEventsBylieu(String lieu);
 

@@ -6,6 +6,7 @@ import com.webatrio.test.repository.EventsRepository;
 import com.webatrio.test.service.EventsService;
 import com.webatrio.test.service.UserService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -81,9 +82,9 @@ public class EventsServiceImpl implements EventsService  {
 
     }
     @Override
-    public List<Events> findEvents( ) {
-
-        return repository.findAll().stream().filter(events -> events.getAnnuler().equals(false)).collect(Collectors.toList());
+    public Page<Events> findEvents(Integer page, Integer size) {
+        Pageable p = PageRequest.of(page,size);
+        return repository.findAllByAnnulerIsFalse(p);
     }
 
     @Override
