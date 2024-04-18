@@ -1,0 +1,50 @@
+<div class="container" *ngIf="user && roles; else loggedOut">
+
+<div align="right">
+  <button (click)="addEvent()" *ngIf="roles =='ROLE_ORGANISATEUR' ">Ajouter</button>
+  <button (click)="myEvents()">Mes Evenement</button>
+
+</div>
+<br>
+<div>
+  <table class="event-table">
+    <thead>
+    <tr>
+      <th>Titre</th>
+      <th>Description</th>
+      <th>Date de début</th>
+      <th>Date de fin</th>
+      <th>lieu <input type="text" id="lieu" [(ngModel)]="lieu" (change)="getEventsByLieu()"> </th>
+      <th>Capacité</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let event of events">
+      <td>{{ event.titre }}</td>
+      <td>{{ event.description }}</td>
+      <td>{{ event.dateDebut }} </td>
+      <td>{{ event.dateFin }}</td>
+      <td>{{ event.lieu }}</td>
+      <td>{{ event.capacite }}</td>
+      <td>
+        <!-- Actions pour chaque événement -->
+        <button (click)="editEvent(event)" *ngIf="roles =='ROLE_ORGANISATEUR' ">Modifier</button>
+         <button (click)="cancelEvent(event.id)" *ngIf="roles =='ROLE_ORGANISATEUR' ">annuler</button>
+        <button *ngIf="!isUserRegistered(event)" (click)="addUserToEvent(event)">Inscrire</button>
+        <button *ngIf="isUserRegistered(event)"  (click)="deleteUserFromEvent(event)">annuler l'inscription</button>
+        <button *ngIf="roles =='ROLE_ORGANISATEUR' " (click)="getParticipant(event.id)">liste des participant</button>
+
+      </td>
+     </tr>
+     </tbody>
+   </table>
+ </div>
+
+ <mat-paginator [length]="totalElements" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]"
+                (page)="onPageChange($event)">
+ </mat-paginator>
+</div>
+<ng-template #loggedOut>
+  Please login.
+</ng-template>

@@ -1,0 +1,39 @@
+<div class="container" *ngIf="roles =='ROLE_ORGANISATEUR' ; else loggedOut">
+
+<br>
+<div>
+  <table class="user-table">
+    <thead>
+    <tr>
+      <th>nom</th>
+      <th>prenom</th>
+      <th>email</th>
+      <th>username</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let user of participant">
+      <td>{{ user.nom }}</td>
+      <td>{{ user.prenom }}</td>
+      <td>{{ user.email }} </td>
+      <td>{{ user.username }}</td>
+
+      <td>
+
+        <button (click)="deleteUserFromEvent(user.id)">annuler l'inscription</button>
+
+
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<mat-paginator [length]="totalElements" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]"
+               (page)="onPageChange($event)">
+</mat-paginator>
+</div>
+  <ng-template #loggedOut>
+    Please login.
+  </ng-template>
