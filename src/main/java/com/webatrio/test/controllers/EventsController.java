@@ -1,9 +1,9 @@
 package com.webatrio.test.controllers;
 
 import com.webatrio.test.models.Events;
-import com.webatrio.test.Utils.RestPage;
 import com.webatrio.test.models.User;
 import com.webatrio.test.service.EventsService;
+import com.webatrio.test.utils.RestPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.dao.DuplicateKeyException;
@@ -44,7 +44,7 @@ public class EventsController {
             throw new IllegalArgumentException("Key does not Exist");
         }
         try {
-            Events result = eventsService.editEvent(events);
+            Events result = eventsService.addEvent(events);
             return result;
         } catch (DuplicateKeyException e) {
             throw new IllegalArgumentException("Key already Exist");
@@ -79,15 +79,11 @@ public class EventsController {
     }
     @ApiOperation(value = "Get Events by lieu")
     @PostMapping("/byLieu/{lieu}")
-    public RestPage<Events> getEventsByLieu(@PathVariable String lieu, @RequestBody Map<String, Integer> paginationParams) {
+    public Page<Events> getEventsByLieu(@PathVariable String lieu, @RequestBody Map<String, Integer> paginationParams) {
         int page = paginationParams.getOrDefault("page", 0);
         int size = paginationParams.getOrDefault("size", 10);
-        Pageable pageable = PageRequest.of(page, size);
-        List<Events> eventsByLieu = eventsService.findEventsBylieu(lieu);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), eventsByLieu.size());
-        Page<Events> eventsPage = new PageImpl<>(eventsByLieu.subList(start, end), pageable, eventsByLieu.size());
-        return new RestPage<>(eventsPage);
+        Page<Events> eventsByLieu = eventsService.findEventsBylieu(lieu,page,size);
+        return eventsByLieu;
     }
     @PreAuthorize("hasRole('ROLE_ORGANISATEUR')")
     @PutMapping("/cancel/{id}")
@@ -136,7 +132,7 @@ public class EventsController {
         int page = paginationParams.getOrDefault("page", 0);
         int size = paginationParams.getOrDefault("size", 10);
         Pageable pageable = PageRequest.of(page, size);
-        Set<User> usersByEvent = eventsService.findUsersByEvent(id);
+        List<User> usersByEvent = eventsService.findUsersByEvent(id);
         List<User> usersList = new ArrayList<>(usersByEvent);
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), usersList.size());
@@ -146,16 +142,12 @@ public class EventsController {
 
     @ApiOperation(value = "Get events for user with pagination")
     @PostMapping("/findEventsForUser/{userId}")
-    public RestPage<Events> getEventsForUserWithPagination(@PathVariable Long userId, @RequestBody Map<String, Integer> paginationParams) {
+    public Page<Events> getEventsForUserWithPagination(@PathVariable Long userId, @RequestBody Map<String, Integer> paginationParams) {
         int page = paginationParams.getOrDefault("page", 0);
         int size = paginationParams.getOrDefault("size", 10);
-        Pageable pageable = PageRequest.of(page, size);
         try {
-            List<Events> userEvents = eventsService.getEventsForUser(userId);
-            int start = (int) pageable.getOffset();
-            int end = Math.min((start + pageable.getPageSize()), userEvents.size());
-            Page<Events> eventsPage = new PageImpl<>(userEvents.subList(start, end), pageable, userEvents.size());
-            return new RestPage<>(eventsPage);
+            Page<Events> userEvents = eventsService.getEventsForUser(userId,page,size);
+                 return userEvents;
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found", e);
         }
