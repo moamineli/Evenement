@@ -1,5 +1,6 @@
 package com.webatrio.test.controllers;
 
+import com.webatrio.test.utils.RestPage;
 import com.webatrio.test.models.Events;
 import com.webatrio.test.models.User;
 import com.webatrio.test.service.EventsService;
