@@ -3,6 +3,7 @@ package com.webatrio.test.serviceImpl;
 import com.webatrio.test.models.Events;
 import com.webatrio.test.models.User;
 import com.webatrio.test.repository.EventsRepository;
+import com.webatrio.test.repository.UserRepository;
 import com.webatrio.test.service.EventsService;
 import com.webatrio.test.service.UserService;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,16 +31,20 @@ public class EventsServiceImpl implements EventsService  {
     @Override
     public Events addEvent(Events events) {
         events.setAnnuler(false);
-     Events result=Optional.of(events).map(repository::save).orElse(null);
-     return result;
+
+        if (events.getDateFin().isAfter(events.getDateDebut()) && events.getDateDebut().isAfter(LocalDateTime.now())) {
+            Events result = Optional.of(events).map(repository::save).orElse(null);
+            return result;
+        }
+        else {
+
+            throw new IllegalArgumentException("false date");
+
+        }
+
     }
 
-    @Override
-    public Events editEvent(Events events) {
-        events.setAnnuler(false);
-        Events result=Optional.of(events).map(repository::save).orElse(null);
-        return result;
-    }
+
 
     @Override
     public Events getEventById(Long id) {
@@ -97,10 +105,18 @@ public class EventsServiceImpl implements EventsService  {
         return repository.findAllByLieuLikeAndAnnulerIsFalseAndDateDebutGreaterThan("%" + lieu + "%",p,LocalDateTime.now());
     }
     @Override
-    public Set<User> findUsersByEvent(Long id) {
+    public List<User> findUsersByEvent(Long id) {
         return repository.findById(id)
                 .map(Events::getListeUser)
-                .orElse(Collections.emptySet());
+                .orElse(Collections.emptyList());
+
+        //  Solution 2
+//       return repository.listUserbyEvents(id)
+//                .stream()
+//                .map(userId -> userRepository.findById(userId))
+//                .filter(Optional::isPresent)
+//                .map(Optional::get)
+//                .collect(Collectors.toList());
     }
     @Override
     public Page<Events> getEventsForUser(Long userId, Integer page, Integer size) {

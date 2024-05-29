@@ -4,6 +4,7 @@ import com.webatrio.test.utils.RestPage;
 import com.webatrio.test.models.Events;
 import com.webatrio.test.models.User;
 import com.webatrio.test.service.EventsService;
+import com.webatrio.test.utils.RestPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.dao.DuplicateKeyException;
@@ -44,7 +45,7 @@ public class EventsController {
             throw new IllegalArgumentException("Key does not Exist");
         }
         try {
-            Events result = eventsService.editEvent(events);
+            Events result = eventsService.addEvent(events);
             return result;
         } catch (DuplicateKeyException e) {
             throw new IllegalArgumentException("Key already Exist");
@@ -132,7 +133,7 @@ public class EventsController {
         int page = paginationParams.getOrDefault("page", 0);
         int size = paginationParams.getOrDefault("size", 10);
         Pageable pageable = PageRequest.of(page, size);
-        Set<User> usersByEvent = eventsService.findUsersByEvent(id);
+        List<User> usersByEvent = eventsService.findUsersByEvent(id);
         List<User> usersList = new ArrayList<>(usersByEvent);
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), usersList.size());
