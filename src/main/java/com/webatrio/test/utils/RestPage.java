@@ -1,4 +1,4 @@
-package com.webatrio.test.Utils;
+package com.webatrio.test.utils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

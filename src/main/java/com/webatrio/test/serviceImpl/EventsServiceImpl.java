@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +33,7 @@ public class EventsServiceImpl implements EventsService  {
 
     @Override
     public Events editEvent(Events events) {
-        events.setAnnuler(true);
+        events.setAnnuler(false);
         Events result=Optional.of(events).map(repository::save).orElse(null);
         return result;
     }
@@ -58,8 +58,13 @@ public class EventsServiceImpl implements EventsService  {
         User user = userDetailsService.findUserById(userId);
        List<User> u = event.getListeUser().stream().filter(user1 -> user1.equals(user)).collect(Collectors.toList());
       if (u.isEmpty()){
-        event.setCapacite(event.getCapacite()-1);
-        event.getListeUser().add(user);
+          if(findUsersByEvent(eventId).size() < event.getCapacite()){
+              event.getListeUser().add(user);
+          }
+          else {
+              throw new IllegalArgumentException("Out of capacity");
+
+          }
       }
       else  {
           throw new IllegalArgumentException("User with id " + userId + " is already added to event with id " + eventId);
@@ -73,8 +78,7 @@ public class EventsServiceImpl implements EventsService  {
         User user = userDetailsService.findUserById(userId);
         List<User> u = event.getListeUser().stream().filter(user1 -> user1.equals(user)).collect(Collectors.toList());
         if (!u.isEmpty()){
-        event.setCapacite(event.getCapacite()+1);
-        event.getListeUser().remove(user);
+         event.getListeUser().remove(user);
         } else  {
             throw new IllegalArgumentException("User with id " + userId + " is not added to event with id " + eventId);
         }
@@ -84,24 +88,28 @@ public class EventsServiceImpl implements EventsService  {
     @Override
     public Page<Events> findEvents(Integer page, Integer size) {
         Pageable p = PageRequest.of(page,size);
-        return repository.findAllByAnnulerIsFalse(p);
+        return repository.findAllByAnnulerIsFalseAndDateDebutGreaterThan(p, LocalDateTime.now());
     }
 
     @Override
-    public List<Events> findEventsBylieu(String lieu) {
-        return repository.findAllByLieuLike("%" + lieu + "%").stream().filter(events -> events.getAnnuler().equals(false)).collect(Collectors.toList());
+    public Page<Events> findEventsBylieu(String lieu, Integer page, Integer size) {
+        Pageable p = PageRequest.of(page,size);
+        return repository.findAllByLieuLikeAndAnnulerIsFalseAndDateDebutGreaterThan("%" + lieu + "%",p,LocalDateTime.now());
     }
     @Override
     public Set<User> findUsersByEvent(Long id) {
-        return repository.findById(id).orElse(null).getListeUser();
+        return repository.findById(id)
+                .map(Events::getListeUser)
+                .orElse(Collections.emptySet());
     }
     @Override
-    public List<Events> getEventsForUser(Long userId) {
+    public Page<Events> getEventsForUser(Long userId, Integer page, Integer size) {
         User user = userDetailsService.findUserById(userId);
+        Pageable p =  PageRequest.of(page,size);
         if (user == null) {
             throw new IllegalArgumentException("User not found with id: " + userId);
         }
-        return repository.findByListeUserContaining(user);
+        return repository.findByListeUserContainingAndDateDebutGreaterThan(user,p,LocalDateTime.now());
     }
 
 }

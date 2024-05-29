@@ -8,12 +8,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface EventsRepository extends PagingAndSortingRepository<Events, Long> {
 
-    List<Events> findAllByLieuLike(String lieu);
-    Page<Events> findAllByAnnulerIsFalse(Pageable p);
-    List<Events> findByListeUserContaining(User u);
+    Page<Events> findAllByLieuLikeAndAnnulerIsFalseAndDateDebutGreaterThan(String lieu,Pageable p, LocalDateTime date);
+    Page<Events> findAllByAnnulerIsFalseAndDateDebutGreaterThan(Pageable p, LocalDateTime date);
+    Page<Events> findByListeUserContainingAndDateDebutGreaterThan(User u,Pageable p,LocalDateTime date);
 }
